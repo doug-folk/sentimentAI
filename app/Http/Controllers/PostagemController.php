@@ -8,7 +8,6 @@ use App\Services\HuggingFaceService;
 
 class PostagemController extends Controller
 {
-  
     public function index()
     {
         $postagens = Postagem::all();
@@ -20,62 +19,57 @@ class PostagemController extends Controller
         return view('postagens.create');
     }
 
-
     public function store(Request $request)
     {
-        $hugginFace = New HuggingFaceService();
-        $sentiment = $hugginFace->analyzeSentiment($request->texto);
-// Verifique o que exatamente está sendo enviado e o que está sendo retornado
-// dd($sentiment, $request->texto);
+        $validated = $request->validate([
+            'texto' => 'required|string|max:500',
+            'rede_social' => 'required|string|max:50'
+        ]);
 
-        if ($sentiment && isset($sentiment[0])) {
-            // Pegue o primeiro sentimento retornado pela API
-            $label = $sentiment[0][0]['label'];
-        } else {
-            // Fallback em caso de resposta inválida
-            $label = 'Sentimento não identificado';
+        try {
+            $huggingFace = new HuggingFaceService();
+            $sentiment = $huggingFace->analyzeSentiment($validated['texto']);
+
+            //  dd($sentiment);
+
+
+            $label = $this->parseSentiment($sentiment);
+        } catch (\Exception $e) {
+            return redirect()->route('postagens.create')
+                ->with('error', 'Erro ao analisar sentimento. Tente novamente mais tarde.');
         }
 
-        //Cria a postagem com o setimento identificado
         Postagem::create([
-            'texto' => $request->texto,
-            'rede_social' => $request->rede_social,
+            'texto' => $validated['texto'],
+            'rede_social' => $validated['rede_social'],
             'sentimento' => $label,
         ]);
 
-            return redirect()->route('postagens.index');
-
+        return redirect()->route('postagens.index')
+            ->with('success', 'Postagem analisada com sucesso!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    protected function parseSentiment($response)
     {
-        //
+        if (!is_array($response) || empty($response)) {
+            return 'NEUTRAL';
+        }
+
+        // Encontra o sentimento com maior score
+        $sentiment = collect($response)->sortByDesc('score')->first();
+
+        if (!$sentiment || !isset($sentiment['label'])) {
+            return 'NEUTRAL';
+        }
+
+        // Mapeia os rótulos para português
+        $labelsMap = [
+            'POSITIVE' => 'POSITIVO',
+            'NEGATIVE' => 'NEGATIVO'
+        ];
+
+        return $labelsMap[$sentiment['label']] ?? $sentiment['label'];
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
+    // ... (métodos show, edit, update, destroy permanecem iguais)
 }

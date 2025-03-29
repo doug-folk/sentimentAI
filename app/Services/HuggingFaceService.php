@@ -1,30 +1,50 @@
 <?php
 
-    namespace App\Services;
+namespace App\Services;
 
-    use Illuminate\Support\Facades\Http;
-    use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+class HuggingFaceService
+{
+    protected $apiKey;
+    protected $model;
 
-    
-    class HuggingFaceService
+    public function __construct()
     {
-        protected $apiKey;
-    
-        public function __construct()
-        {
-            //carrega a chave da api
-            $this->apiKey = env('HUGGING_FACE_API_KEY');
-        }
-    
-        public function analyzeSentiment($text)
-        {
-            
+        $this->apiKey = env('HUGGING_FACE_API_KEY');
+        $this->model = 'cardiffnlp/twitter-xlm-roberta-base-sentiment';
+    }
+
+    public function analyzeSentiment($text)
+    {
+        try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
-            ])->post('https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english', [
+                'Content-Type' => 'application/json',
+            ])
+            ->timeout(30)
+            ->post("https://api-inference.huggingface.co/models/{$this->model}", [
                 'inputs' => $text,
+                'options' => ['wait_for_model' => true]
             ]);
-    
-            return $response->json();
+            // dd(env('HUGGING_FACE_API_KEY'));
+
+
+            if ($response->failed()) {
+                throw new \Exception("API Error: " . $response->status());
+            }
+
+            $result = $response->json();
+
+            if (!is_array($result) || empty($result[0])) {
+                throw new \Exception("Resposta inválida da API");
+            }
+
+            return $result[0]; // Retorna toda a análise para ser processada no controller
+
+        } catch (\Exception $e) {
+            Log::error('Erro na análise de sentimento: ' . $e->getMessage());
+            return null;
         }
     }
+}

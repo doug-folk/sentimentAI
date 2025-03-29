@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Postagem extends Model
 {
+
+ 
     use HasFactory;
 
     //Adicionando texto a lista de campos prenchiveis
