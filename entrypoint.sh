@@ -9,11 +9,15 @@ done
 echo "✅ Database ready! Initializing Laravel..."
 
 # 1. Configuração inicial
-if [ ! -f ".env" ]; then
-  echo "⚙️ Creating .env file..."
-  cp .env.example .env
-  php artisan key:generate
-fi
+echo "⚙️ Creating or updating .env file..."
+cp -f .env.example .env
+
+echo "🔑 Generating application key..."
+php artisan key:generate --force
+
+# Garante permissões corretas
+chmod 777 .env
+
 
 # 2. Dependências (executa apenas se necessário)
 if [ ! -d "vendor" ]; then
