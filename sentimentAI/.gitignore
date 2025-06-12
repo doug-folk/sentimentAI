@@ -1,0 +1,48 @@
+# Laravel Specific
+/.phpunit.cache
+/.phpunit.result.cache
+/bootstrap/cache/*.php  # Cache de configuração, rotas, etc. do Laravel
+/public/build
+/public/hot
+/public/storage       # Link simbólico para storage/app/public
+/storage/*.key
+/storage/pail
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/logs/        # Logs da aplicação
+/vendor               # Dependências PHP via Composer
+
+# Environment Variables
+.env
+.env.backup
+.env.production
+.env.local            # Variantes de .env para desenvolvimento local
+.env.*.local          # Para outras variações como .env.development.local
+
+# Node / Frontend Specific
+/node_modules
+npm-debug.log* # Captura todos os arquivos de log de debug do npm
+yarn-error.log* # Captura todos os arquivos de log de erro do Yarn
+# Se você tiver uma pasta 'dist' fora de 'public/build', adicione:
+# /dist
+
+# IDE Specific
+.phpactor.json        # Arquivo de configuração do PHPStan
+/.fleet               # Arquivos de projeto do JetBrains Fleet
+/.idea                # Arquivos de projeto do JetBrains IDEs (IntelliJ, PhpStorm, etc.)
+/.nova                # Arquivos de projeto do Nova
+/.vscode              # Arquivos de configuração do VS Code
+/.vscode-remote       # Cache para desenvolvimento remoto do VS Code
+/.zed                 # Arquivos de projeto do Zed
+
+# Operating System Specific
+.DS_Store             # Arquivos de metadados do macOS
+Thumbs.db             # Arquivos de cache de miniaturas do Windows
+
+# Other Temporary / Generated Files
+*.log                 # Quaisquer outros arquivos .log genéricos
+*.sqlite              # Bancos de dados SQLite (comuns para desenvolvimento local)
+*.sublime-* # Arquivos de projeto do Sublime Text
+*.swp                 # Arquivos de swap do Vim
+*.swo                 # Arquivos de swap do Vim
